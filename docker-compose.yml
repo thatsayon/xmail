@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ayon
+      POSTGRES_PASSWORD: ecom
+      POSTGRES_DB: xmail
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+
+volumes:
+  postgres_data:
