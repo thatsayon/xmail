@@ -2,9 +2,13 @@ services:
   db:
     image: postgres:13
     environment:
-      POSTGRES_USER: ayon
-      POSTGRES_PASSWORD: ecom
-      POSTGRES_DB: xmail
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pingayon
+      POSTGRES_DB: xmail-db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -12,18 +16,19 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - mynetwork
 
-networks:
-  mynetwork:
-
 volumes:
   postgres_data:
+
+networks:
+  mynetwork:
